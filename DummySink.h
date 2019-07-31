@@ -9,14 +9,14 @@ extern "C"
 #include "MediaSession.hh"
 #include "Boolean.hh"
 #include "UsageEnvironment.hh"
-#include "Queue.h"
+#include "Decoder.h"
 #define DUMMY_SINK_RECEIVE_BUFFER_SIZE 100000
 #define DEBUG_PRINT_EACH_RECEIVED_FRAME
 
 class DummySink: public MediaSink
 {
 public:
-    DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, Queue<std::pair<std::string,AVPacket*>> &q);
+    DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, const Decoder *d);
     virtual ~DummySink();
 
 private:
@@ -35,7 +35,7 @@ private:
     MediaSubsession& fSubsession;
     char* fStreamId;
 
-    Queue<std::pair<std::string,AVPacket*>> &pkt_queue_;
+    Decoder *decoder_;
     struct timeval pre_time_stamp = {0,0};
     char *p_nalu_tail = nullptr;
     char *nalu_buffer = nullptr;

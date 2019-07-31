@@ -1,8 +1,8 @@
 #include "MultiRTSPClient.h"
 #include "DummySink.h"
 
-MultiRTSPClient::MultiRTSPClient(UsageEnvironment &env, const char *rtspURL, Queue<std::pair<std::string, AVPacket *> > &pkt_queu, int verbosityLevel, const char *applicationName, portNumBits tunnelOverHTTPPortNum):
-    pkt_queue_(pkt_queu),RTSPClient(env,rtspURL,verbosityLevel,applicationName,tunnelOverHTTPPortNum, -1)
+MultiRTSPClient::MultiRTSPClient(UsageEnvironment &env, const char *rtspURL, int verbosityLevel, const char *applicationName, portNumBits tunnelOverHTTPPortNum):
+    RTSPClient(env,rtspURL,verbosityLevel,applicationName,tunnelOverHTTPPortNum, -1)
 {
 }
 
@@ -82,7 +82,7 @@ void continueAfterSETUP(RTSPClient *rtspClient, int resultCode, char *resultStri
         // (This will prepare the data sink to receive data; the actual flow of data from the client won't start happening until later,
         // after we've sent a RTSP "PLAY" command.)
 
-        scs.subsession->sink = new DummySink(env, *scs.subsession, rtspClient->url(), ((MultiRTSPClient*)rtspClient)->pkt_queue_);
+        scs.subsession->sink = new DummySink(env, *scs.subsession, rtspClient->url(), ((MultiRTSPClient*)rtspClient)->decoder_);
         // perhaps use your own custom "MediaSink" subclass instead
         if (scs.subsession->sink == NULL) {
             env << *rtspClient << "Failed to create a data sink for the \"" << *scs.subsession

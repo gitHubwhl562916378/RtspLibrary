@@ -8,10 +8,10 @@ extern "C"
 #include "DummySink.h"
 #include "Queue.h"
 
-DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, Queue<std::pair<std::string, AVPacket *> > &q):
+DummySink::DummySink(UsageEnvironment& env, MediaSubsession& subsession, char const* streamId, const Decoder *d):
     MediaSink(env),
     fSubsession(subsession),
-    pkt_queue_(q)
+    decoder_(d)
 {
     fStreamId = ::strDup(streamId);
     if(fStreamId[::strlen(fStreamId) - 1] == '/'){
@@ -66,6 +66,8 @@ void DummySink::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,
     {
         if (isFirstFrame_)            // 仅每次播放的第一次进入执行本段代码
         {    // 对视频数据的SPS,PPS进行补偿
+            std::string msg;
+            decoder_->Initsize(AV_CODEC_ID_H264, msg);
             unsigned numSPropRecords;
             SPropRecord* sPropRecords = parseSPropParameterSets(fSubsession.fmtp_spropparametersets(), numSPropRecords);
             // spydroid v6.8 or spydroid v9.1.
@@ -101,7 +103,7 @@ void DummySink::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,
                     av_new_packet(paket, p_nalu_tail - nalu_buffer);
                     memcpy(paket->data , nalu_buffer, p_nalu_tail - nalu_buffer);
 
-                    pkt_queue_.Put(std::make_pair(std::string(fStreamId),paket));
+                    decoder_->Decode(paket);
                 }
                 p_nalu_tail = nalu_buffer;
                 memcpy(p_nalu_tail, start_code, sizeof(start_code));

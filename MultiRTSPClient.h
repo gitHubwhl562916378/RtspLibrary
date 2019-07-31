@@ -8,7 +8,7 @@ extern "C"
 }
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
-#include "Queue.h"
+#include "Decoder.h"
 #define REQUEST_STREAMING_OVER_TCP True
 
 class StreamClientState {
@@ -37,12 +37,12 @@ public:
  class MultiRTSPClient : public RTSPClient
  {
  public:
-     MultiRTSPClient(UsageEnvironment& env, char const* rtspURL, Queue<std::pair<std::string,AVPacket*>> &pkt_queu, int verbosityLevel = 0,
+     MultiRTSPClient(UsageEnvironment& env, char const* rtspURL, int verbosityLevel = 0,
      char const* applicationName = nullptr, portNumBits tunnelOverHTTPPortNum = 0);
      virtual ~MultiRTSPClient();
 
+     Decoder *decoder_ = nullptr;
      StreamClientState scs;
-     Queue<std::pair<std::string,AVPacket*>> &pkt_queue_;
  };
 
  // RTSP 'response handlers':
