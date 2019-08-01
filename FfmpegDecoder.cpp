@@ -52,10 +52,8 @@ void FfmpegDecoder::Decode(const AVPacket *pkt)
     taskManager_->GetIOService().post([=]{
         int frameFinished = 0;
         int resCode = -1;
-        {
-            std::lock_guard<std::mutex> lock(decod_mtx_);
-            resCode = avcodec_decode_video2(codec_context_, decoded_frame_, &frameFinished, pkt);
-        }
+        std::lock_guard<std::mutex> lock(decod_mtx_);
+        resCode = avcodec_decode_video2(codec_context_, decoded_frame_, &frameFinished, pkt);
         if(!resCode){
             std::cout << "decode pkg error: " << std::to_string(resCode) << std::endl;
             av_free_packet(pkt);

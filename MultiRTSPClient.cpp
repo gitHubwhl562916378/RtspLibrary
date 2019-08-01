@@ -58,7 +58,7 @@ void continueAfterDESCRIBE(RTSPClient *rtspClient, int resultCode, char *resultS
     // An unrecoverable error occurred with this stream.
     shutdownStream(rtspClient);
 }
-#include <iostream>
+
 void continueAfterSETUP(RTSPClient *rtspClient, int resultCode, char *resultString)
 {
     do {
