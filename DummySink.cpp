@@ -39,7 +39,24 @@ void DummySink::afterGettingFrame(void* clientData, unsigned frameSize,
     sink->afterGettingFrame(frameSize, numTruncatedBytes, presentationTime, durationInMicroseconds);
 
 }
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+#include <sstream>
+void Base64Decode(const std::string &input, std::string &output)
+{
+    typedef boost::archive::iterators::transform_width<boost::archive::iterators::binary_from_base64<std::string::const_iterator>, 8, 6> Base64DecodeIterator;
+    std::stringstream result;
+    try {
+        std::copy( Base64DecodeIterator( input.begin() ), Base64DecodeIterator( input.end() ), std::ostream_iterator<char>( result ) );
+    } catch ( ... ) {
+        return false;
+    }
+    output = result.str();
+    return output.empty() == false;
+}
 
+#include <iostream>
 void DummySink::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,
                                   struct timeval presentationTime,
                                   unsigned durationInMicroseconds)
@@ -70,6 +87,14 @@ void DummySink::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,
             decoder_->Initsize(AV_CODEC_ID_H264, msg);
             unsigned numSPropRecords;
             SPropRecord* sPropRecords = parseSPropParameterSets(fSubsession.fmtp_spropparametersets(), numSPropRecords);
+//            SPropRecord &sps = sPropRecords[0];
+//            SPropRecord &pps = sPropRecords[1];
+//            std::cout << std::hex;
+//            for(int i = 0; i < sps.sPropLength; i++){
+//                std::cout << (int)sps.sPropBytes[i] << " ";
+//            }
+//            std::cout << std::endl;
+
             // spydroid v6.8 or spydroid v9.1.
             for (unsigned i = 0; i < numSPropRecords; ++i)
             {
@@ -77,8 +102,8 @@ void DummySink::afterGettingFrame(unsigned frameSize,unsigned numTruncatedBytes,
                 p_nalu_tail += sizeof(start_code);
                 memcpy(p_nalu_tail, sPropRecords[i].sPropBytes, sPropRecords[i].sPropLength);
                 p_nalu_tail += sPropRecords[i].sPropLength;
+                delete[] sPropRecords[i].sPropBytes;
             }
-
             isFirstFrame_ = false; // 标记SPS,PPS已经完成补偿
 
             memcpy(p_nalu_tail, start_code, sizeof(start_code));
