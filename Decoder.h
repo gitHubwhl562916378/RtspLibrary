@@ -9,7 +9,6 @@ extern "C"
 #include <memory>
 #include <functional>
 
-class DecoderFactory;
 class Decoder
 {
 public:
@@ -17,8 +16,6 @@ public:
     virtual ~Decoder(){}
     /***
      * @codec   视频编码方式
-     * @width   视频宽度
-     * @height  视频高度
      * @error   错误信息
     ***/
     virtual bool Initsize(const AVCodecID codec,std::string &error) = 0;

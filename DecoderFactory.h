@@ -1,12 +1,33 @@
 #pragma once
+#include <dlfcn.h>
 #include <thread>
-#include "FfmpegDecoder.h"
+#include "Decoder.h"
 #include "TaskManager.h"
+
+Decoder *loadPlugin(const char *path, TaskManager*t)
+{
+    void *handle = dlopen(path,RTLD_LAZY);
+    if(!handle){
+        std::cout << dlerror() << std::endl;
+        return nullptr;
+    }
+
+    dlerror();
+    typedef Decoder*(*CreatePlugin)(TaskManager*);
+    CreatePlugin createFun = dlsym(handle,"createDecoder");
+
+    char *error = nullptr;
+    if((error = dlerror()) != nullptr){
+        std::cout << error << std::endl;
+        return nullptr;
+    }
+    return createFun(t);
+}
 
 class DecoderFactory
 {
 public:
-    enum Type{
+    enum DecoderType{
         Ffmpeg,
         Nvidia
     };
@@ -15,13 +36,14 @@ public:
     void Initsize(int thr_num){
         taskManager_ = new TaskManager(thr_num);
     }
-    Decoder* MakeDecoder(Type t = Ffmpeg){
+    Decoder* MakeDecoder(DecoderType t = Ffmpeg){
         Decoder *d = nullptr;
         switch (t) {
         case Ffmpeg:
-            d = new FfmpegDecoder(taskManager_);
+            d = loadPlugin("libFfmpegDecoderPlugin.so",taskManager_);
             break;
         case Nvidia:
+            d = loadPlugin("libNvidiaDecoderPlugin.so",taskManager_);
             break;
         }
         return d;

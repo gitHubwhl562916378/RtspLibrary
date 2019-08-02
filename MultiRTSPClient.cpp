@@ -58,7 +58,7 @@ void continueAfterDESCRIBE(RTSPClient *rtspClient, int resultCode, char *resultS
     // An unrecoverable error occurred with this stream.
     shutdownStream(rtspClient);
 }
-
+#include <iostream>
 void continueAfterSETUP(RTSPClient *rtspClient, int resultCode, char *resultString)
 {
     do {
@@ -82,6 +82,8 @@ void continueAfterSETUP(RTSPClient *rtspClient, int resultCode, char *resultStri
         // (This will prepare the data sink to receive data; the actual flow of data from the client won't start happening until later,
         // after we've sent a RTSP "PLAY" command.)
 
+//        std::ostream::fmtflags oldFlag = std::cout.flags();
+//        std::cout << std::hex << (int)scs.subsession->fmtp_spropsps()[0] << (int)scs.subsession->fmtp_spropsps()[1] << (int)scs.subsession->fmtp_spropsps()[2] << std::endl;
         scs.subsession->sink = new DummySink(env, *scs.subsession, rtspClient->url(), ((MultiRTSPClient*)rtspClient)->decoder_);
         // perhaps use your own custom "MediaSink" subclass instead
         if (scs.subsession->sink == NULL) {

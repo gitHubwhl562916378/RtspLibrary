@@ -49,6 +49,7 @@ void FfmpegDecoder::SetFrameCallBack(const std::function<void (const AVPixelForm
 
 void FfmpegDecoder::Decode(const AVPacket *pkt)
 {
+    std::cout << pkt->size << std::endl;
     taskManager_->GetIOService().post([=]{
         int frameFinished = 0;
         int resCode = -1;
@@ -95,4 +96,9 @@ void FfmpegDecoder::Decode(const AVPacket *pkt)
         av_free_packet(pkt);
         delete pkt;
     });
+}
+extern "C"
+Decoder* createDecoder(TaskManager* t)
+{
+    return new FfmpegDecoder(t);
 }

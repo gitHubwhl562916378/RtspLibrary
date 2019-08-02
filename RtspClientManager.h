@@ -18,7 +18,7 @@ public:
     virtual ~RTSPClientManager();
 
     void RunEventLoop();
-    void OpenRtsp(const std::string &rtsp_url,const std::function<void(const AVPixelFormat format, const u_char *data, const int width, const int height)> handler);
+    void OpenRtsp(const std::string &rtsp_url, const DecoderFactory::DecoderType t, const std::function<void(const AVPixelFormat format, const u_char *data, const int width, const int height)> handler);
     void ShutDownClient(const std::string &rtsp_url);
 
 private:

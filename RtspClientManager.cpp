@@ -22,13 +22,13 @@ void RTSPClientManager::RunEventLoop()
     env_->taskScheduler().doEventLoop(&eventLoopWatchVariable_);
 }
 
-void RTSPClientManager::OpenRtsp(const std::__cxx11::string &rtsp_url, const std::function<void (const AVPixelFormat, const u_char *, const int, const int)> handler)
+void RTSPClientManager::OpenRtsp(const std::__cxx11::string &rtsp_url, const DecoderFactory::DecoderType t, const std::function<void (const AVPixelFormat, const u_char *, const int, const int)> handler)
 {
     //一路rtsp一个decoder,保持sps,pps对应不然会解不出来
     std::lock_guard<std::mutex> lock(handler_mtx_);
     if(client_map_.find(rtsp_url) != client_map_.end())return;
     MultiRTSPClient *client = new MultiRTSPClient(*env_,rtsp_url.data(),1,"multi_rtsp_client");
-    client->decoder_ = decoder_factory_->MakeDecoder();
+    client->decoder_ = decoder_factory_->MakeDecoder(t);
     client->decoder_->SetFrameCallBack(handler);
     client->sendDescribeCommand(continueAfterDESCRIBE);
     client_map_.insert(std::make_pair(rtsp_url, client));
